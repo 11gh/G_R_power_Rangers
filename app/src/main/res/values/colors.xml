@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="bg_dark">#0E1418</color>
+    <color name="bg_icon">#141A1F</color>
+    <color name="text_primary">#F3F7FD</color>
+    <color name="text_secondary">#A7ABB1</color>
+    <color name="cyan_neon">#81ECFF</color>
+    <color name="cyan_glow">#81ECFF</color>
+    <color name="muted_gray">#A7ABB1</color>
+    <color name="header_bg">#171717</color>
+    <color name="app_bar_bg">#171717</color>
+    <color name="bg_standby">#6D7275</color>
+    <color name="cyan_glow_alpha">#6681ECFF</color>
+</resources>
