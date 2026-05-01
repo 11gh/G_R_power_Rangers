@@ -184,12 +184,30 @@ public class HomeFragment extends Fragment {
         deviceList.add(new Device("kitchen_fridge", "Kitchen Fridge", 0.3, true, R.drawable.ic_fridge));
         deviceList.add(new Device("water_heater", "Water Heater", 0.0, false, R.drawable.ic_water_heater));
 
-        deviceAdapter = new DeviceAdapter(deviceList, (device, isChecked) -> sendCommandToESP32(device.getId(), isChecked ? 1 : 0));
+        deviceAdapter = new DeviceAdapter(deviceList, new DeviceAdapter.OnDeviceChangeListener() {
+            @Override
+            public void onDeviceToggle(Device device, boolean isChecked) {
+                sendCommandToESP32(device.getId(), isChecked ? 1 : 0);
+            }
+
+            @Override
+            public void onDeviceClick(Device device) {
+                navigateToDeviceDetails(device);
+            }
+        });
         
         binding.rvDeviceList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvDeviceList.setHasFixedSize(true);
         binding.rvDeviceList.setNestedScrollingEnabled(false);
         binding.rvDeviceList.setAdapter(deviceAdapter);
+    }
+
+    private void navigateToDeviceDetails(Device device) {
+        DevicesFragment detailsFragment = DevicesFragment.newInstance(device.getId(), device.getName());
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, detailsFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     private void setupViewAllToggle() {

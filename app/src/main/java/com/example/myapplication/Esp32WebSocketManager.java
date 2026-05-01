@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -25,7 +28,10 @@ public class Esp32WebSocketManager {
     private boolean isConnected = false;
     private OnConnectionStatusListener connectionStatusListener;
     private OnMessageReceivedListener messageReceivedListener;
-    private final String wsUrl = "ws://192.168.4.1:81"; // [ESP32 DEV GUIDE] Default ESP32 AP IP
+    
+    private String discoveredIp = null;
+    private NsdManager nsdManager;
+    private NsdManager.DiscoveryListener discoveryListener;
 
     public interface OnConnectionStatusListener {
         void onStatusChange(boolean connected);
@@ -50,6 +56,62 @@ public class Esp32WebSocketManager {
         return instance;
     }
 
+    public void initDiscovery(Context context) {
+        nsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        startDiscovery();
+    }
+
+    private void startDiscovery() {
+        discoveryListener = new NsdManager.DiscoveryListener() {
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Stop Discovery failed: Error code:" + errorCode);
+            }
+
+            @Override
+            public void onDiscoveryStarted(String serviceType) {
+                Log.d(TAG, "Service discovery started");
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.i(TAG, "Discovery stopped: " + serviceType);
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo serviceInfo) {
+                Log.d(TAG, "Service found: " + serviceInfo);
+                if (serviceInfo.getServiceName().contains("power-ranger")) {
+                    nsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
+                        @Override
+                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                            Log.e(TAG, "Resolve failed: " + errorCode);
+                        }
+
+                        @Override
+                        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                            Log.d(TAG, "Resolve Succeeded. " + serviceInfo);
+                            discoveredIp = serviceInfo.getHost().getHostAddress();
+                            mainHandler.post(() -> connect());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo serviceInfo) {
+                Log.e(TAG, "service lost: " + serviceInfo);
+            }
+        };
+
+        nsdManager.discoverServices("_ws._tcp.", NsdManager.PROTOCOL_DNS_SD, discoveryListener);
+    }
+
     public void setConnectionStatusListener(OnConnectionStatusListener listener) {
         this.connectionStatusListener = listener;
     }
@@ -59,33 +121,33 @@ public class Esp32WebSocketManager {
     }
 
     public void connect() {
-        if (isConnected) return;
+        if (isConnected || discoveredIp == null) return;
+
+        String wsUrl = "ws://" + discoveredIp + ":81";
+        Log.d(TAG, "Attempting connection to: " + wsUrl);
 
         Request request = new Request.Builder().url(wsUrl).build();
         webSocket = client.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
                 isConnected = true;
-                Log.d(TAG, "Connected to ESP32");
+                Log.d(TAG, "Connected to ESP32 at " + discoveredIp);
                 notifyConnectionStatus(true);
             }
 
             @Override
             public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
-                // [ESP32 DEV GUIDE] Background parsing of incoming JSON
                 parseIncomingMessage(text);
             }
 
             @Override
             public void onClosing(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
                 webSocket.close(1000, null);
-                Log.d(TAG, "Closing: " + reason);
             }
 
             @Override
             public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
                 isConnected = false;
-                Log.d(TAG, "Closed: " + reason);
                 notifyConnectionStatus(false);
                 reconnect();
             }
@@ -93,7 +155,6 @@ public class Esp32WebSocketManager {
             @Override
             public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
                 isConnected = false;
-                Log.e(TAG, "Failure: " + t.getMessage());
                 notifyConnectionStatus(false);
                 reconnect();
             }
@@ -101,7 +162,10 @@ public class Esp32WebSocketManager {
     }
 
     private void reconnect() {
-        mainHandler.postDelayed(this::connect, 5000); // Attempt reconnection every 5 seconds
+        mainHandler.postDelayed(() -> {
+            if (discoveredIp != null) connect();
+            else startDiscovery();
+        }, 5000);
     }
 
     private void notifyConnectionStatus(boolean connected) {
@@ -142,85 +206,65 @@ public class Esp32WebSocketManager {
         }
     }
 
-    /*
-     * [ESP32 DEV GUIDE]
-     * To toggle a relay, send the following JSON:
-     * {
-     *   "action": "toggle_relay",
-     *   "device_id": "living_room_ac",
-     *   "target_state": 1
-     * }
-     */
     public void sendRelayCommand(String deviceId, int targetState) {
         if (webSocket != null && isConnected) {
-            RelayCommand cmd = new RelayCommand("toggle_relay", deviceId, targetState);
+            GenericCommand cmd = new GenericCommand("toggle_relay", deviceId);
+            cmd.targetState = targetState;
             webSocket.send(gson.toJson(cmd));
         }
     }
 
-    // --- Data Models ---
+    public void sendLimitValue(String deviceId, double limit) {
+        if (webSocket != null && isConnected) {
+            GenericCommand cmd = new GenericCommand("set_limit", deviceId);
+            cmd.limitValue = limit;
+            webSocket.send(gson.toJson(cmd));
+        }
+    }
+
+    public void sendModeCommand(String deviceId, String mode) {
+        if (webSocket != null && isConnected) {
+            GenericCommand cmd = new GenericCommand("set_mode", deviceId);
+            cmd.mode = mode;
+            webSocket.send(gson.toJson(cmd));
+        }
+    }
 
     private static class BaseMessage {
         String type;
     }
 
-    /*
-     * [ESP32 DEV GUIDE]
-     * Inbound Telemetry (Send every 1000ms):
-     * {
-     *   "type": "telemetry",
-     *   "pwr_kw": 4.2,
-     *   "bill_syp": 24500,
-     *   "volts": 220.5,
-     *   "freq": 50.0
-     * }
-     */
     public static class TelemetryMessage {
         @SerializedName("pwr_kw") public double pwrKw;
         @SerializedName("bill_syp") public double billSyp;
         @SerializedName("volts") public double volts;
         @SerializedName("freq") public double freq;
+        @SerializedName("current") public double current;
+        @SerializedName("energy") public double energy;
+        @SerializedName("pf") public double pf;
     }
 
-    /*
-     * [ESP32 DEV GUIDE]
-     * Inbound Device Status (Send on state change):
-     * {
-     *   "type": "relay_status",
-     *   "device_id": "living_room_ac",
-     *   "state": 1,
-     *   "kw": 1.5
-     * }
-     */
     public static class RelayStatusMessage {
         @SerializedName("device_id") public String deviceId;
         public int state;
         public double kw;
     }
 
-    /*
-     * [ESP32 DEV GUIDE]
-     * Inbound Alerts (Send strictly on faults):
-     * {
-     *   "type": "alert",
-     *   "title": "Voltage Fluctuation",
-     *   "body": "Zone 2 Protected."
-     * }
-     */
     public static class AlertMessage {
         public String title;
         public String body;
     }
 
-    private static class RelayCommand {
+    private static class GenericCommand {
         String action;
         @SerializedName("device_id") String deviceId;
-        @SerializedName("target_state") int targetState;
+        @SerializedName("target_state") Integer targetState;
+        @SerializedName("limit_value") Double limitValue;
+        String mode;
 
-        RelayCommand(String action, String deviceId, int targetState) {
+        GenericCommand(String action, String deviceId) {
             this.action = action;
             this.deviceId = deviceId;
-            this.targetState = targetState;
         }
     }
 }

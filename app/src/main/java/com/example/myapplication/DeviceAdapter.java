@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import java.util.List;
+import java.util.Locale;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder> {
 
@@ -20,6 +20,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
 
     public interface OnDeviceChangeListener {
         void onDeviceToggle(Device device, boolean isChecked);
+        void onDeviceClick(Device device);
     }
 
     public DeviceAdapter(List<Device> devices, OnDeviceChangeListener listener) {
@@ -51,13 +52,19 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                 listener.onDeviceToggle(device, isChecked);
             }
         });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDeviceClick(device);
+            }
+        });
     }
 
     private void updateUIState(DeviceViewHolder holder, Device device) {
         if (device.getState()) {
             holder.cardDevice.setCardBackgroundColor(Color.parseColor("#0E1418"));
             holder.tvDeviceName.setTextColor(Color.parseColor("#F3F7FD"));
-            holder.tvDeviceStatus.setText(String.format("%.1f kW", device.getConsumptionKw()));
+            holder.tvDeviceStatus.setText(String.format(Locale.getDefault(), "%.1f kW", device.getConsumptionKw()));
             holder.tvDeviceStatus.setTextColor(Color.parseColor("#81ECFF"));
             holder.ivDeviceIcon.setColorFilter(Color.parseColor("#81ECFF"));
         } else {
