@@ -12,9 +12,18 @@ import java.util.List;
 public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHolder> {
 
     private List<Alert> alerts;
+    private OnAlertLongClickListener longClickListener;
+
+    public interface OnAlertLongClickListener {
+        void onAlertLongClick(Alert alert, int position);
+    }
 
     public AlertAdapter(List<Alert> alerts) {
         this.alerts = alerts;
+    }
+
+    public void setOnAlertLongClickListener(OnAlertLongClickListener listener) {
+        this.longClickListener = listener;
     }
 
     @NonNull
@@ -35,6 +44,14 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
                 System.currentTimeMillis(), 
                 DateUtils.MINUTE_IN_MILLIS);
         holder.timestamp.setText(relativeTime);
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                longClickListener.onAlertLongClick(alert, holder.getBindingAdapterPosition());
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -43,8 +60,10 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
     }
 
     public void removeAt(int position) {
-        alerts.remove(position);
-        notifyItemRemoved(position);
+        if (position >= 0 && position < alerts.size()) {
+            alerts.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     public static class AlertViewHolder extends RecyclerView.ViewHolder {

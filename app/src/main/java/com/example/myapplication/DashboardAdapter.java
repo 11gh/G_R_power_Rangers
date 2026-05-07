@@ -83,7 +83,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         } else if (holder instanceof SectionHeaderViewHolder) {
             ((SectionHeaderViewHolder) holder).bind();
         } else if (holder instanceof DeviceViewHolder) {
-            ((DeviceViewHolder) holder).bind(devices.get(position - 3), deviceChangeListener);
+            ((DeviceViewHolder) holder).bind(devices.get(position - 3), deviceChangeListener, position);
         }
     }
 
@@ -154,7 +154,7 @@ public class DashboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             super(binding.getRoot());
             this.binding = binding;
         }
-        void bind(Device device, DeviceAdapter.OnDeviceChangeListener listener) {
+        void bind(Device device, DeviceAdapter.OnDeviceChangeListener listener, int position) {
             binding.tvDeviceName.setText(device.getName());
             binding.ivDeviceIcon.setImageResource(device.getIconResId());
             
@@ -178,6 +178,20 @@ public class DashboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 if (listener != null) {
                     listener.onDeviceToggle(device, isChecked);
                 }
+            });
+
+            binding.getRoot().setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeviceClick(device);
+                }
+            });
+
+            binding.getRoot().setOnLongClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeviceLongClick(device, position);
+                    return true;
+                }
+                return false;
             });
         }
     }

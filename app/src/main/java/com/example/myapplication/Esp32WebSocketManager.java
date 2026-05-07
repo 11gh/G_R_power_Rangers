@@ -41,6 +41,7 @@ public class Esp32WebSocketManager {
         void onTelemetryReceived(TelemetryMessage data);
         void onRelayStatusReceived(RelayStatusMessage data);
         void onAlertReceived(AlertMessage data);
+        void onEmergencyReceived(EmergencyMessage data);
     }
 
     private Esp32WebSocketManager() {
@@ -64,146 +65,78 @@ public class Esp32WebSocketManager {
     private void startDiscovery() {
         discoveryListener = new NsdManager.DiscoveryListener() {
             @Override
-            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
-            }
-
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) { Log.e(TAG, "Discovery failed: " + errorCode); }
             @Override
-            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Stop Discovery failed: Error code:" + errorCode);
-            }
-
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) { Log.e(TAG, "Stop Discovery failed: " + errorCode); }
             @Override
-            public void onDiscoveryStarted(String serviceType) {
-                Log.d(TAG, "Service discovery started");
-            }
-
+            public void onDiscoveryStarted(String serviceType) { Log.d(TAG, "Service discovery started"); }
             @Override
-            public void onDiscoveryStopped(String serviceType) {
-                Log.i(TAG, "Discovery stopped: " + serviceType);
-            }
+            public void onDiscoveryStopped(String serviceType) { Log.i(TAG, "Discovery stopped"); }
 
             @Override
             public void onServiceFound(NsdServiceInfo serviceInfo) {
-                Log.d(TAG, "Service found: " + serviceInfo);
                 if (serviceInfo.getServiceName().contains("power-ranger")) {
                     nsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
                         @Override
-                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                            Log.e(TAG, "Resolve failed: " + errorCode);
-                        }
-
+                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {}
                         @Override
                         public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                            Log.d(TAG, "Resolve Succeeded. " + serviceInfo);
                             discoveredIp = serviceInfo.getHost().getHostAddress();
                             mainHandler.post(() -> connect());
                         }
                     });
                 }
             }
-
             @Override
-            public void onServiceLost(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "service lost: " + serviceInfo);
-            }
+            public void onServiceLost(NsdServiceInfo serviceInfo) { isConnected = false; }
         };
-
         nsdManager.discoverServices("_ws._tcp.", NsdManager.PROTOCOL_DNS_SD, discoveryListener);
     }
 
-    public void setConnectionStatusListener(OnConnectionStatusListener listener) {
-        this.connectionStatusListener = listener;
-    }
-
-    public void setMessageReceivedListener(OnMessageReceivedListener listener) {
-        this.messageReceivedListener = listener;
-    }
+    public void setConnectionStatusListener(OnConnectionStatusListener listener) { this.connectionStatusListener = listener; }
+    public void setMessageReceivedListener(OnMessageReceivedListener listener) { this.messageReceivedListener = listener; }
 
     public void connect() {
         if (isConnected || discoveredIp == null) return;
-
         String wsUrl = "ws://" + discoveredIp + ":81";
-        Log.d(TAG, "Attempting connection to: " + wsUrl);
-
         Request request = new Request.Builder().url(wsUrl).build();
         webSocket = client.newWebSocket(request, new WebSocketListener() {
             @Override
             public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
                 isConnected = true;
-                Log.d(TAG, "Connected to ESP32 at " + discoveredIp);
                 notifyConnectionStatus(true);
             }
-
             @Override
-            public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
-                parseIncomingMessage(text);
-            }
-
+            public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) { parseIncomingMessage(text); }
             @Override
-            public void onClosing(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-                webSocket.close(1000, null);
-            }
-
+            public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) { isConnected = false; notifyConnectionStatus(false); reconnect(); }
             @Override
-            public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-                isConnected = false;
-                notifyConnectionStatus(false);
-                reconnect();
-            }
-
-            @Override
-            public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) {
-                isConnected = false;
-                notifyConnectionStatus(false);
-                reconnect();
-            }
+            public void onFailure(@NonNull WebSocket webSocket, @NonNull Throwable t, Response response) { isConnected = false; notifyConnectionStatus(false); reconnect(); }
         });
     }
 
-    private void reconnect() {
-        mainHandler.postDelayed(() -> {
-            if (discoveredIp != null) connect();
-            else startDiscovery();
-        }, 5000);
-    }
-
-    private void notifyConnectionStatus(boolean connected) {
-        mainHandler.post(() -> {
-            if (connectionStatusListener != null) {
-                connectionStatusListener.onStatusChange(connected);
-            }
-        });
-    }
+    private void reconnect() { mainHandler.postDelayed(() -> { if (discoveredIp != null) connect(); else startDiscovery(); }, 5000); }
+    private void notifyConnectionStatus(boolean connected) { mainHandler.post(() -> { if (connectionStatusListener != null) connectionStatusListener.onStatusChange(connected); }); }
 
     private void parseIncomingMessage(String json) {
         try {
             BaseMessage base = gson.fromJson(json, BaseMessage.class);
             if (base.type == null) return;
-
             switch (base.type) {
                 case "telemetry":
                     TelemetryMessage tm = gson.fromJson(json, TelemetryMessage.class);
-                    mainHandler.post(() -> {
-                        if (messageReceivedListener != null) messageReceivedListener.onTelemetryReceived(tm);
-                    });
+                    mainHandler.post(() -> { if (messageReceivedListener != null) messageReceivedListener.onTelemetryReceived(tm); });
+                    break;
+                case "emergency":
+                    EmergencyMessage em = gson.fromJson(json, EmergencyMessage.class);
+                    mainHandler.post(() -> { if (messageReceivedListener != null) messageReceivedListener.onEmergencyReceived(em); });
                     break;
                 case "relay_status":
                     RelayStatusMessage rm = gson.fromJson(json, RelayStatusMessage.class);
-                    mainHandler.post(() -> {
-                        if (messageReceivedListener != null) messageReceivedListener.onRelayStatusReceived(rm);
-                    });
-                    break;
-                case "alert":
-                    AlertMessage am = gson.fromJson(json, AlertMessage.class);
-                    mainHandler.post(() -> {
-                        if (messageReceivedListener != null) messageReceivedListener.onAlertReceived(am);
-                    });
+                    mainHandler.post(() -> { if (messageReceivedListener != null) messageReceivedListener.onRelayStatusReceived(rm); });
                     break;
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Parsing Error", e);
-        }
+        } catch (Exception e) { Log.e(TAG, "Parsing Error", e); }
     }
 
     public void sendRelayCommand(String deviceId, int targetState) {
@@ -230,30 +163,43 @@ public class Esp32WebSocketManager {
         }
     }
 
-    private static class BaseMessage {
-        String type;
+    public void sendScheduleCommand(String deviceId, String startTime, double workHrs, double offHrs) {
+        if (webSocket != null && isConnected) {
+            GenericCommand cmd = new GenericCommand("set_schedule", deviceId);
+            cmd.startTime = startTime;
+            cmd.workDuration = workHrs;
+            cmd.offDuration = offHrs;
+            webSocket.send(gson.toJson(cmd));
+        }
     }
 
+    private static class BaseMessage { String type; }
+
     public static class TelemetryMessage {
-        @SerializedName("pwr_kw") public double pwrKw;
-        @SerializedName("bill_syp") public double billSyp;
         @SerializedName("volts") public double volts;
-        @SerializedName("freq") public double freq;
         @SerializedName("current") public double current;
-        @SerializedName("energy") public double energy;
-        @SerializedName("pf") public double pf;
+        @SerializedName("pwr_w") public double pwrW;
+        @SerializedName("bill_syp") public double billSyp;
+        @SerializedName("relay") public int relayState;
+        @SerializedName("mode") public String mode;
+        // Fields for compatibility if needed
+        public double energy;
+        public double pf;
+        public double freq;
+    }
+
+    public static class EmergencyMessage {
+        public String reason;
+        public double v;
+        public double i;
     }
 
     public static class RelayStatusMessage {
         @SerializedName("device_id") public String deviceId;
         public int state;
-        public double kw;
     }
 
-    public static class AlertMessage {
-        public String title;
-        public String body;
-    }
+    public static class AlertMessage { public String title; public String body; }
 
     private static class GenericCommand {
         String action;
@@ -261,10 +207,10 @@ public class Esp32WebSocketManager {
         @SerializedName("target_state") Integer targetState;
         @SerializedName("limit_value") Double limitValue;
         String mode;
+        @SerializedName("start_time") String startTime;
+        @SerializedName("work_duration") Double workDuration;
+        @SerializedName("off_duration") Double offDuration;
 
-        GenericCommand(String action, String deviceId) {
-            this.action = action;
-            this.deviceId = deviceId;
-        }
+        GenericCommand(String action, String deviceId) { this.action = action; this.deviceId = deviceId; }
     }
 }

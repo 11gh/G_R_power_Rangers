@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +20,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     public interface OnDeviceChangeListener {
         void onDeviceToggle(Device device, boolean isChecked);
         void onDeviceClick(Device device);
+        void onDeviceLongClick(Device device, int position);
     }
 
     public DeviceAdapter(List<Device> devices, OnDeviceChangeListener listener) {
@@ -31,7 +31,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     @NonNull
     @Override
     public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_device, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_device_test, parent, false);
         return new DeviceViewHolder(view);
     }
 
@@ -39,8 +39,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
         Device device = devices.get(position);
         holder.tvDeviceName.setText(device.getName());
-        holder.ivDeviceIcon.setImageResource(device.getIconResId());
         
+        // Map consumption to energy value
+        holder.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.1f", device.getConsumptionKw()));
+        // Price value (placeholder or calculated if available)
+        holder.tvPriceValue.setText("---");
+
         updateUIState(holder, device);
 
         holder.swDeviceToggle.setOnCheckedChangeListener(null);
@@ -58,21 +62,23 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
                 listener.onDeviceClick(device);
             }
         });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onDeviceLongClick(device, holder.getBindingAdapterPosition());
+                return true;
+            }
+            return false;
+        });
     }
 
     private void updateUIState(DeviceViewHolder holder, Device device) {
         if (device.getState()) {
-            holder.cardDevice.setCardBackgroundColor(Color.parseColor("#0E1418"));
+            holder.cardDevice.setStrokeColor(Color.parseColor("#81ECFF"));
             holder.tvDeviceName.setTextColor(Color.parseColor("#F3F7FD"));
-            holder.tvDeviceStatus.setText(String.format(Locale.getDefault(), "%.1f kW", device.getConsumptionKw()));
-            holder.tvDeviceStatus.setTextColor(Color.parseColor("#81ECFF"));
-            holder.ivDeviceIcon.setColorFilter(Color.parseColor("#81ECFF"));
         } else {
-            holder.cardDevice.setCardBackgroundColor(Color.parseColor("#6D7275"));
-            holder.tvDeviceName.setTextColor(Color.parseColor("#1F272C"));
-            holder.tvDeviceStatus.setText("Standby");
-            holder.tvDeviceStatus.setTextColor(Color.parseColor("#1F272C"));
-            holder.ivDeviceIcon.setColorFilter(Color.parseColor("#1F272C"));
+            holder.cardDevice.setStrokeColor(Color.parseColor("#444444"));
+            holder.tvDeviceName.setTextColor(Color.parseColor("#A7ABB1"));
         }
     }
 
@@ -83,16 +89,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
 
     public static class DeviceViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView cardDevice;
-        ImageView ivDeviceIcon;
-        TextView tvDeviceName, tvDeviceStatus;
+        TextView tvDeviceName, tvEnergyValue, tvPriceValue;
         MaterialSwitch swDeviceToggle;
 
         public DeviceViewHolder(@NonNull View itemView) {
             super(itemView);
             cardDevice = itemView.findViewById(R.id.cardDevice);
-            ivDeviceIcon = itemView.findViewById(R.id.ivDeviceIcon);
             tvDeviceName = itemView.findViewById(R.id.tvDeviceName);
-            tvDeviceStatus = itemView.findViewById(R.id.tvDeviceStatus);
+            tvEnergyValue = itemView.findViewById(R.id.item_energy_value);
+            tvPriceValue = itemView.findViewById(R.id.item_price_value);
             swDeviceToggle = itemView.findViewById(R.id.swDeviceToggle);
         }
     }
