@@ -2,7 +2,7 @@
     <string name="app_name">My Application</string>
     <string name="view_all">VIEW ALL</string>
     <string name="view_none">VIEW NONE</string>
-    <string name="unit_kw">kW</string>
+    <string name="unit_kw">kWh</string>
     <string name="unit_w">W</string>
     <string name="system_error">System Error</string>
 </resources>

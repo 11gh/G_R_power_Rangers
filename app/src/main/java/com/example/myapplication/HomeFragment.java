@@ -59,7 +59,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onAlertReceived(Esp32WebSocketManager.AlertMessage data) {
-                // Feature not in test layout, but could be added as Toast or Dialog
+                // Future feature: Show Toast or update UI for alerts
             }
 
             @Override
@@ -77,8 +77,8 @@ public class HomeFragment extends Fragment {
 
     private void updateTelemetryUI(Esp32WebSocketManager.TelemetryMessage metric) {
         if (binding == null) return;
-        double pwrKw = metric.pwrW / 1000.0;
-        binding.energyValue.setText(String.format(Locale.getDefault(), "%.2f", pwrKw));
+        double energyKwh = metric.pwrW / 1000.0;
+        binding.energyValue.setText(String.format(Locale.getDefault(), "%.2f", energyKwh));
         binding.priceValue.setText(currencyFormat.format(metric.billSyp));
     }
 

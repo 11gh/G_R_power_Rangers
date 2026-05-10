@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardDevice"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#F3F7FD"
+    app:cardBackgroundColor="#0E1418">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvDeviceName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Living Room AC"
+            android:textColor="#F3F7FD"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/tvPowerUnit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/tvPowerUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unit_kw"
+            android:textColor="#2FF801"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="48dp"
+            app:layout_constraintEnd_toStartOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SYP"
+            android:layout_marginEnd="16dp"
+            android:textColor="#81ECFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_energy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="1.5"
+            android:textColor="#F3F7FD"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/swDeviceToggle"
+            app:layout_constraintEnd_toEndOf="@+id/tvPowerUnit"
+            app:layout_constraintStart_toStartOf="@+id/tvPowerUnit"
+            app:layout_constraintTop_toTopOf="@+id/swDeviceToggle" />
+
+        <TextView
+            android:id="@+id/item_energy_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="1.5"
+            android:textColor="#F3F7FD"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/swDeviceToggle"
+            app:layout_constraintEnd_toEndOf="@+id/tvPowerUnit"
+            app:layout_constraintStart_toStartOf="@+id/tvPowerUnit"
+            app:layout_constraintTop_toTopOf="@+id/swDeviceToggle" />
+
+        <TextView
+            android:id="@+id/item_price_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.500"
+            android:textColor="#F3F7FD"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/item_energy"
+            app:layout_constraintEnd_toEndOf="@+id/textView"
+            app:layout_constraintStart_toStartOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="@+id/item_energy" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swDeviceToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX="0.7"
+            android:scaleY="0.7"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvDeviceName"
+            app:layout_constraintTop_toBottomOf="@+id/tvDeviceName"
+            app:thumbTint="@color/cyan_glow"
+            app:trackDecorationTint="@color/cyan_glow" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
