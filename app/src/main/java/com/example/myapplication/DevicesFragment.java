@@ -372,7 +372,7 @@ public class DevicesFragment extends Fragment {
         binding.tvCurrentValue.setText(String.format(Locale.getDefault(), "%.2f A", current));
         binding.tvVoltageValue.setText(String.format(Locale.getDefault(), "%.1f V", voltage));
         binding.tvPowerValue.setText(String.format(Locale.getDefault(), "%.1f W", power));
-        binding.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.2f Wh", energy));
+        binding.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.3f Kwh", energy));
         binding.tvPFValue.setText(String.format(Locale.getDefault(), "%.2f", pf));
         binding.tvFreqValue.setText(String.format(Locale.getDefault(), "%.1f Hz", freq));
 

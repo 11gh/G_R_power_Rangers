@@ -86,7 +86,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Manual"
-                android:textColor="#81ECFF"
+                android:textColor="@color/toggle_button_text_color"
+                app:backgroundTint="@color/toggle_button_background_tint"
                 app:strokeColor="#81ECFF" />
 
             <com.google.android.material.button.MaterialButton
@@ -95,7 +96,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Auto"
-                android:textColor="#81ECFF"
+                android:textColor="@color/toggle_button_text_color"
+                app:backgroundTint="@color/toggle_button_background_tint"
                 app:strokeColor="#81ECFF" />
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -344,7 +346,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="تيار"
+                    android:text="التيار"
                     android:textColor="#A7ABB1"
                     android:textSize="12sp" />
 
@@ -352,9 +354,10 @@
                     android:id="@+id/tvCurrentValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.0 A"
+                    android:layout_marginTop="4dp"
+                    android:text="0.00 A"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -371,7 +374,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="جهد"
+                    android:text="الجهد"
                     android:textColor="#A7ABB1"
                     android:textSize="12sp" />
 
@@ -379,9 +382,10 @@
                     android:id="@+id/tvVoltageValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="0.0 V"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -398,7 +402,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="استطاعة"
+                    android:text="الاستطاعة"
                     android:textColor="#A7ABB1"
                     android:textSize="12sp" />
 
@@ -406,13 +410,14 @@
                     android:id="@+id/tvPowerValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="0.0 W"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- الاستطاعة بالواط الساعي (Energy) -->
+            <!-- الطاقة (Energy) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -425,7 +430,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="استطاعة (واط ساعي)"
+                    android:text="الطاقة"
                     android:textColor="#A7ABB1"
                     android:textSize="12sp" />
 
@@ -433,13 +438,14 @@
                     android:id="@+id/tvEnergyValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.0 Wh"
+                    android:layout_marginTop="4dp"
+                    android:text="0.000 Kwh"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- عامل الاستطاعة (Power Factor) -->
+            <!-- عامل الاستطاعة (PF) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -460,9 +466,10 @@
                     android:id="@+id/tvPFValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="0.00"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -487,12 +494,12 @@
                     android:id="@+id/tvFreqValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
                     android:text="0.0 Hz"
                     android:textColor="#F3F7FD"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
         </GridLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
