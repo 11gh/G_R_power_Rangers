@@ -1,66 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardDevice"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="#F3F7FD"
-    app:cardBackgroundColor="#0E1418">
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <FrameLayout
-            android:id="@+id/iconContainer"
+        <ImageView
+            android:id="@+id/ivDeviceIcon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@drawable/bg_device_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_power"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/ivDeviceIcon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_power"
-                app:tint="#81ECFF" />
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/tvDeviceName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Living Room AC"
-            android:textColor="#F3F7FD"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/tvDeviceStatus"
+            android:text="Device Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/swDeviceToggle"
-            app:layout_constraintStart_toEndOf="@id/iconContainer"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
+            app:layout_constraintStart_toEndOf="@+id/ivDeviceIcon"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvDeviceStatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="1.5 kW"
-            android:textColor="#A7ABB1"
-            android:textSize="12sp"
+            android:text="Status"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/swDeviceToggle"
+            app:layout_constraintEnd_toEndOf="@+id/tvDeviceName"
             app:layout_constraintStart_toStartOf="@+id/tvDeviceName"
-            app:layout_constraintTop_toBottomOf="@id/tvDeviceName" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDeviceName" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swDeviceToggle"
@@ -68,9 +50,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:thumbTint="@color/cyan_glow"
-            app:trackDecorationTint="@color/cyan_glow" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

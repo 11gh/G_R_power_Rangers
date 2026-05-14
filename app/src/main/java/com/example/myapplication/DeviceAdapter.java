@@ -2,13 +2,10 @@ package com.example.myapplication;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.materialswitch.MaterialSwitch;
+import com.example.myapplication.databinding.ItemDeviceTestBinding;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,55 +28,15 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     @NonNull
     @Override
     public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_device_test, parent, false);
-        return new DeviceViewHolder(view);
+        ItemDeviceTestBinding binding = ItemDeviceTestBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new DeviceViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
         Device device = devices.get(position);
-        holder.tvDeviceName.setText(device.getName());
-        
-        // Map consumption to energy value
-        holder.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.1f", device.getConsumptionKw()));
-        // Price value (placeholder or calculated if available)
-        holder.tvPriceValue.setText("---");
-
-        updateUIState(holder, device);
-
-        holder.swDeviceToggle.setOnCheckedChangeListener(null);
-        holder.swDeviceToggle.setChecked(device.getState());
-        holder.swDeviceToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            device.setState(isChecked);
-            updateUIState(holder, device);
-            if (listener != null) {
-                listener.onDeviceToggle(device, isChecked);
-            }
-        });
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeviceClick(device);
-            }
-        });
-
-        holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null) {
-                listener.onDeviceLongClick(device, holder.getBindingAdapterPosition());
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void updateUIState(DeviceViewHolder holder, Device device) {
-        if (device.getState()) {
-            holder.cardDevice.setStrokeColor(Color.parseColor("#81ECFF"));
-            holder.tvDeviceName.setTextColor(Color.parseColor("#F3F7FD"));
-        } else {
-            holder.cardDevice.setStrokeColor(Color.parseColor("#444444"));
-            holder.tvDeviceName.setTextColor(Color.parseColor("#A7ABB1"));
-        }
+        holder.bind(device, listener, position);
     }
 
     @Override
@@ -88,17 +45,59 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     }
 
     public static class DeviceViewHolder extends RecyclerView.ViewHolder {
-        MaterialCardView cardDevice;
-        TextView tvDeviceName, tvEnergyValue, tvPriceValue;
-        MaterialSwitch swDeviceToggle;
+        private final ItemDeviceTestBinding binding;
 
-        public DeviceViewHolder(@NonNull View itemView) {
-            super(itemView);
-            cardDevice = itemView.findViewById(R.id.cardDevice);
-            tvDeviceName = itemView.findViewById(R.id.tvDeviceName);
-            tvEnergyValue = itemView.findViewById(R.id.item_energy_value);
-            tvPriceValue = itemView.findViewById(R.id.item_price_value);
-            swDeviceToggle = itemView.findViewById(R.id.swDeviceToggle);
+        public DeviceViewHolder(@NonNull ItemDeviceTestBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        public void bind(Device device, OnDeviceChangeListener listener, int position) {
+            binding.tvDeviceName.setText(device.getName());
+            
+            // تحديث قيم الاستهلاك والتكلفة للجهاز (قيم تجريبية حالياً أو من الكائن)
+            binding.itemEnergyValue.setText(String.format(Locale.getDefault(), "%.1f", device.getConsumptionKw()));
+            binding.itemPriceValue.setText(String.format(Locale.getDefault(), "%.0f", device.getLimit())); // مثال
+
+            updateUIState(device);
+
+            binding.swDeviceToggle.setOnCheckedChangeListener(null);
+            binding.swDeviceToggle.setChecked(device.getState());
+            binding.swDeviceToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                device.setState(isChecked);
+                updateUIState(device);
+                if (listener != null) {
+                    listener.onDeviceToggle(device, isChecked);
+                }
+            });
+
+            binding.getRoot().setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeviceClick(device);
+                }
+            });
+
+            binding.getRoot().setOnLongClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeviceLongClick(device, getBindingAdapterPosition());
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        private void updateUIState(Device device) {
+            if (device.getState()) {
+                binding.cardDevice.setStrokeColor(Color.parseColor("#81ECFF"));
+                binding.tvDeviceName.setTextColor(Color.parseColor("#F3F7FD"));
+                binding.itemEnergyValue.setTextColor(Color.parseColor("#F3F7FD"));
+                binding.itemPriceValue.setTextColor(Color.parseColor("#F3F7FD"));
+            } else {
+                binding.cardDevice.setStrokeColor(Color.parseColor("#444444"));
+                binding.tvDeviceName.setTextColor(Color.parseColor("#A7ABB1"));
+                binding.itemEnergyValue.setTextColor(Color.parseColor("#6D7275"));
+                binding.itemPriceValue.setTextColor(Color.parseColor("#6D7275"));
+            }
         }
     }
 }

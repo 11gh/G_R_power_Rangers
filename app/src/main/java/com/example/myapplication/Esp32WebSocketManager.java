@@ -173,6 +173,15 @@ public class Esp32WebSocketManager {
         }
     }
 
+    public void sendPauseCommand(String deviceId, String operationType, boolean isPaused) {
+        if (webSocket != null && isConnected) {
+            GenericCommand cmd = new GenericCommand("pause_op", deviceId);
+            cmd.opType = operationType; // "limit" or "schedule"
+            cmd.paused = isPaused;
+            webSocket.send(gson.toJson(cmd));
+        }
+    }
+
     private static class BaseMessage { String type; }
 
     public static class TelemetryMessage {
@@ -182,7 +191,6 @@ public class Esp32WebSocketManager {
         @SerializedName("bill_syp") public double billSyp;
         @SerializedName("relay") public int relayState;
         @SerializedName("mode") public String mode;
-        // Fields for compatibility if needed
         public double energy;
         public double pf;
         public double freq;
@@ -210,6 +218,8 @@ public class Esp32WebSocketManager {
         @SerializedName("start_time") String startTime;
         @SerializedName("work_duration") Double workDuration;
         @SerializedName("off_duration") Double offDuration;
+        @SerializedName("op_type") String opType;
+        Boolean paused;
 
         GenericCommand(String action, String deviceId) { this.action = action; this.deviceId = deviceId; }
     }

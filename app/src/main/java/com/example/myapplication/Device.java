@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
+
 public class Device {
     private String id;
     private String name;
@@ -10,8 +12,14 @@ public class Device {
     
     // Scheduling fields
     private String startTime; // Format: "HH:mm"
-    private double workDuration; // Hours
-    private double offDuration; // Hours
+    private double workDuration; // Seconds (Modified for demo)
+    private double offDuration; // Seconds (Modified for demo)
+    
+    // Pause states
+    private boolean isLimitPaused = false;
+    private boolean isSchedulePaused = false;
+    private boolean isLimitActive = false;
+    private boolean isScheduleActive = false;
 
     public Device() {
     }
@@ -24,8 +32,8 @@ public class Device {
         this.iconResId = iconResId;
         this.limit = 5000;
         this.startTime = "08:00";
-        this.workDuration = 2.0;
-        this.offDuration = 1.0;
+        this.workDuration = 10.0; // Default 10 seconds for demo
+        this.offDuration = 10.0;  // Default 10 seconds for demo
     }
 
     public String getId() { return id; }
@@ -37,6 +45,10 @@ public class Device {
     public String getStartTime() { return startTime; }
     public double getWorkDuration() { return workDuration; }
     public double getOffDuration() { return offDuration; }
+    public boolean isLimitPaused() { return isLimitPaused; }
+    public boolean isSchedulePaused() { return isSchedulePaused; }
+    public boolean isLimitActive() { return isLimitActive; }
+    public boolean isScheduleActive() { return isScheduleActive; }
 
     public void setId(String id) { this.id = id; }
     public void setName(String name) { this.name = name; }
@@ -47,4 +59,14 @@ public class Device {
     public void setStartTime(String startTime) { this.startTime = startTime; }
     public void setWorkDuration(double workDuration) { this.workDuration = workDuration; }
     public void setOffDuration(double offDuration) { this.offDuration = offDuration; }
+    public void setLimitPaused(boolean limitPaused) { isLimitPaused = limitPaused; }
+    public void setSchedulePaused(boolean schedulePaused) { isSchedulePaused = schedulePaused; }
+    public void setLimitActive(boolean limitActive) { isLimitActive = limitActive; }
+    public void setScheduleActive(boolean scheduleActive) { isScheduleActive = scheduleActive; }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return name != null ? name : "";
+    }
 }

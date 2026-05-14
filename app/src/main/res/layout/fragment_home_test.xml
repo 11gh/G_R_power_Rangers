@@ -85,7 +85,7 @@
                 android:id="@+id/tvPowerUnit"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="kWh"
+                android:text="kW"
                 android:textColor="#2FF801"
                 android:textSize="18sp"
                 android:textStyle="bold"

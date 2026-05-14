@@ -25,11 +25,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <AutoCompleteTextView
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/autoCompleteDeviceSelector"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="none"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:textColor="#F3F7FD" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -102,7 +104,6 @@
 
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        <!-- Auto Mode Settings Container -->
         <LinearLayout
             android:id="@+id/scrollAutoSettings"
             android:layout_width="match_parent"
@@ -113,7 +114,6 @@
             app:layout_constraintTop_toBottomOf="@id/toggleGroupMode"
             tools:visibility="visible">
 
-            <!-- Cost Limit Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardLimitSettings"
                 android:layout_width="match_parent"
@@ -137,7 +137,6 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Progress Visualization -->
                     <com.google.android.material.progressindicator.CircularProgressIndicator
                         android:id="@+id/progressLimit"
                         android:layout_width="wrap_content"
@@ -190,10 +189,22 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="4dp"
                             android:text="بدء"
                             app:backgroundTint="#81ECFF"
                             android:textColor="#0E1418" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPauseLimit"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:layout_marginEnd="4dp"
+                            android:text="إيقاف مؤقت"
+                            android:textColor="#FFA500"
+                            android:visibility="gone"
+                            app:strokeColor="#FFA500" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCancelLimit"
@@ -208,7 +219,6 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Schedule Settings Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardScheduleSettings"
                 android:layout_width="match_parent"
@@ -251,16 +261,15 @@
                             android:layout_height="wrap_content"
                             android:text="08:00 AM"
                             android:textColor="#81ECFF"
-                            app:icon="@drawable/ic_clock"
-                            app:iconTint="#81ECFF" />
+                            app:icon="@drawable/ic_clock" />
                     </LinearLayout>
 
                     <TextView
                         android:id="@+id/tvWorkDuration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="مدة العمل: 2 ساعة"
+                        android:layout_marginTop="16dp"
+                        android:text="مدة العمل: 10 ثانية"
                         android:textColor="#F3F7FD" />
 
                     <com.google.android.material.slider.Slider
@@ -268,8 +277,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:valueFrom="0.0"
-                        android:valueTo="12.0"
-                        android:stepSize="0.5"
+                        android:valueTo="300.0"
+                        android:stepSize="1.0"
                         app:thumbColor="#81ECFF"
                         app:trackColorActive="#81ECFF" />
 
@@ -277,8 +286,8 @@
                         android:id="@+id/tvOffDuration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="مدة التوقف: 1 ساعة"
+                        android:layout_marginTop="16dp"
+                        android:text="مدة التوقف: 10 ثانية"
                         android:textColor="#F3F7FD" />
 
                     <com.google.android.material.slider.Slider
@@ -286,15 +295,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:valueFrom="0.0"
-                        android:valueTo="12.0"
-                        android:stepSize="0.5"
+                        android:valueTo="300.0"
+                        android:stepSize="1.0"
                         app:thumbColor="#81ECFF"
                         app:trackColorActive="#81ECFF" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
@@ -302,10 +311,22 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="8dp"
-                            android:text="حفظ الخطة"
+                            android:layout_marginEnd="4dp"
+                            android:text="حفظ"
                             app:backgroundTint="#81ECFF"
                             android:textColor="#0E1418" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPauseSchedule"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:layout_marginEnd="4dp"
+                            android:text="إيقاف مؤقت"
+                            android:textColor="#FFA500"
+                            android:visibility="gone"
+                            app:strokeColor="#FFA500" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCancelSchedule"
@@ -313,7 +334,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="إلغاء"
+                            android:text="إيقاف"
                             android:textColor="#FF5252"
                             app:strokeColor="#FF5252" />
                     </LinearLayout>
@@ -325,181 +346,192 @@
             android:id="@+id/gridMetrics"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
             android:columnCount="2"
             android:rowCount="3"
-            app:layout_constraintTop_toBottomOf="@id/scrollAutoSettings"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:alignmentMode="alignMargins"
+            app:layout_constraintTop_toBottomOf="@id/scrollAutoSettings">
 
-            <!-- التيار (Current) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="التيار"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="الاستطاعة"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvPowerValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 W"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvCurrentValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.00 A"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- الجهد (Voltage) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="الجهد"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="الجهد"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvVoltageValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 V"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvVoltageValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.0 V"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- الاستطاعة (Power) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="الاستطاعة"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="التيار"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvCurrentValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.00 A"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvPowerValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.0 W"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- الطاقة (Energy) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="الطاقة"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="الطاقة"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvEnergyValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.000 Kwh"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvEnergyValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.000 Kwh"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- عامل الاستطاعة (PF) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="عامل الاستطاعة"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="معامل القدرة"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvPFValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.00"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvPFValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.00"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- التردد (Frequency) -->
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFreq"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:layout_margin="4dp"
-                android:background="#1A2026"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                app:cardBackgroundColor="#1A2026"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="التردد"
-                    android:textColor="#A7ABB1"
-                    android:textSize="12sp" />
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="التردد"
+                        android:textColor="#A7ABB1"
+                        android:textSize="12sp" />
+                    <TextView
+                        android:id="@+id/tvFreqValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 Hz"
+                        android:textColor="#F3F7FD"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvFreqValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0.0 Hz"
-                    android:textColor="#F3F7FD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
         </GridLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

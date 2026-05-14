@@ -5,14 +5,17 @@
     android:orientation="horizontal"
     android:padding="12dp"
     android:gravity="center_vertical"
-    android:background="@color/black">
+    android:clickable="false"
+    android:focusable="false">
 
     <ImageView
         android:id="@+id/ivDeviceIcon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/ic_power"
-        android:tint="#81ECFF" />
+        android:tint="#81ECFF"
+        android:clickable="false"
+        android:focusable="false" />
 
     <TextView
         android:id="@+id/tvDeviceName"
@@ -20,6 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:textColor="#F3F7FD"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:clickable="false"
+        android:focusable="false" />
 
 </LinearLayout>
