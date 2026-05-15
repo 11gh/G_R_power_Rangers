@@ -159,10 +159,15 @@ public class DevicesFragment extends Fragment {
             dev.setLimitPaused(false);
             deviceManager.saveDevices();
             
+            // 1. إرسال قيمة الحد
             wsManager.sendLimitValue(deviceId, (double) limit);
+            // 2. تفعيل وضع الـ Auto لضمان عمل الميزة
+            wsManager.sendModeCommand(deviceId, "auto");
+            binding.toggleGroupMode.check(R.id.btnAuto);
+            
             binding.btnPauseLimit.setVisibility(View.VISIBLE);
             binding.btnPauseLimit.setText("إيقاف مؤقت");
-            Toast.makeText(getContext(), "تم بدء مراقبة التكلفة", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "تم بدء مراقبة التكلفة وتحويل الجهاز للوضع التلقائي", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnPauseLimit.setOnClickListener(v -> {
@@ -174,6 +179,7 @@ public class DevicesFragment extends Fragment {
             
             wsManager.sendPauseCommand(deviceId, "limit", newState);
             binding.btnPauseLimit.setText(newState ? "استمرار" : "إيقاف مؤقت");
+            Toast.makeText(getContext(), newState ? "تم الإيقاف مؤقتاً" : "تم الاستئناف", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnCancelLimit.setOnClickListener(v -> {
@@ -184,6 +190,7 @@ public class DevicesFragment extends Fragment {
             
             wsManager.sendLimitValue(deviceId, 0.0);
             binding.btnPauseLimit.setVisibility(View.GONE);
+            binding.progressLimit.setProgress(0);
             Toast.makeText(getContext(), "تم إلغاء مراقبة التكلفة", Toast.LENGTH_SHORT).show();
         });
 
@@ -208,10 +215,15 @@ public class DevicesFragment extends Fragment {
             dev.setSchedulePaused(false);
             deviceManager.saveDevices();
 
+            // 1. إرسال الخطة
             wsManager.sendScheduleCommand(deviceId, startTime, (double) workSecs, (double) offSecs);
+            // 2. تفعيل وضع الـ Auto
+            wsManager.sendModeCommand(deviceId, "auto");
+            binding.toggleGroupMode.check(R.id.btnAuto);
+
             binding.btnPauseSchedule.setVisibility(View.VISIBLE);
             binding.btnPauseSchedule.setText("إيقاف مؤقت");
-            Toast.makeText(getContext(), "تم حفظ الخطة الزمنية", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "تم تفعيل الخطة الزمنية وتحويل الجهاز للوضع التلقائي", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnPauseSchedule.setOnClickListener(v -> {
@@ -223,6 +235,7 @@ public class DevicesFragment extends Fragment {
             
             wsManager.sendPauseCommand(deviceId, "schedule", newState);
             binding.btnPauseSchedule.setText(newState ? "استمرار" : "إيقاف مؤقت");
+            Toast.makeText(getContext(), newState ? "تم الإيقاف مؤقتاً" : "تم الاستئناف", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnCancelSchedule.setOnClickListener(v -> {
@@ -295,6 +308,22 @@ public class DevicesFragment extends Fragment {
         binding.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.3f Kwh", energy));
         binding.tvPFValue.setText(String.format(Locale.getDefault(), "%.2f", pf));
         binding.tvFreqValue.setText(String.format(Locale.getDefault(), "%.1f Hz", freq));
+
+        // حساب السعر الفعلي بناءً على المعادلة (600 لـ 0.01 و 1400 للباقي)
+        double energyKwh = energy;
+        double calculatedPrice = (energyKwh <= 0.01) ? 
+                (energyKwh / 0.01) * 600 : 
+                600 + ((energyKwh - 0.01) / 0.01) * 1400;
+
+        // تحديث شريط التقدم الدائري للتكلفة
+        Device dev = getSelectedDevice();
+        if (dev != null && dev.isLimitActive()) {
+            double limit = dev.getLimit();
+            if (limit > 0) {
+                int progress = (int) ((calculatedPrice / limit) * 100);
+                binding.progressLimit.setProgress(Math.min(progress, 100));
+            }
+        }
     }
 
     @Override
@@ -306,6 +335,19 @@ public class DevicesFragment extends Fragment {
                 binding.swMainRelay.setOnCheckedChangeListener(null);
                 binding.swMainRelay.setChecked(data.relayState == 1);
                 setupRelayControl();
+                
+                // تحديث حالة الوضع (Manual/Auto) من الجهاز
+                if (data.mode != null) {
+                    binding.toggleGroupMode.removeOnButtonCheckedListener(modeListener);
+                    if (data.mode.equals("auto")) {
+                        binding.toggleGroupMode.check(R.id.btnAuto);
+                        binding.scrollAutoSettings.setVisibility(View.VISIBLE);
+                    } else {
+                        binding.toggleGroupMode.check(R.id.btnManual);
+                        binding.scrollAutoSettings.setVisibility(View.GONE);
+                    }
+                    binding.toggleGroupMode.addOnButtonCheckedListener(modeListener);
+                }
             }
             @Override public void onRelayStatusReceived(Esp32WebSocketManager.RelayStatusMessage data) {}
             @Override public void onAlertReceived(Esp32WebSocketManager.AlertMessage data) {}

@@ -77,9 +77,22 @@ public class HomeFragment extends Fragment {
 
     private void updateTelemetryUI(Esp32WebSocketManager.TelemetryMessage metric) {
         if (binding == null) return;
-        double energyKwh = metric.pwrW / 1000.0;
-        binding.energyValue.setText(String.format(Locale.getDefault(), "%.2f", energyKwh));
-        binding.priceValue.setText(currencyFormat.format(metric.billSyp));
+
+        // 1. استخدام الطاقة التراكمية الصحيحة (kWh) من الحساس
+        double energyKwh = metric.energy;
+        binding.energyValue.setText(String.format(Locale.getDefault(), "%.3f", energyKwh));
+
+        // 2. حساب السعر بناءً على المعادلة المطلوبة:
+        // أول 0.01 ك.و.س بسعر 600 ليرة
+        // ما بعد ذلك، كل 0.01 ك.و.س بسعر 1400 ليرة
+        double totalBill = 0;
+        if (energyKwh <= 0.01) {
+            totalBill = (energyKwh / 0.01) * 600;
+        } else {
+            totalBill = 600 + ((energyKwh - 0.01) / 0.01) * 1400;
+        }
+
+        binding.priceValue.setText(currencyFormat.format(totalBill));
     }
 
     private void updateDeviceStatusUI(Esp32WebSocketManager.RelayStatusMessage data) {
