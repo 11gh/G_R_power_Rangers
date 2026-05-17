@@ -14,6 +14,8 @@ public class Device {
     private String startTime; // Format: "HH:mm"
     private double workDuration; // Seconds (Modified for demo)
     private double offDuration; // Seconds (Modified for demo)
+    private int remainingSeconds; // For countdown UI
+    private boolean isWorkingPhase = true; // To track if we are in work or off duration
     
     // Pause states
     private boolean isLimitPaused = false;
@@ -34,6 +36,7 @@ public class Device {
         this.startTime = "08:00";
         this.workDuration = 10.0; // Default 10 seconds for demo
         this.offDuration = 10.0;  // Default 10 seconds for demo
+        this.remainingSeconds = 10;
     }
 
     public String getId() { return id; }
@@ -45,6 +48,8 @@ public class Device {
     public String getStartTime() { return startTime; }
     public double getWorkDuration() { return workDuration; }
     public double getOffDuration() { return offDuration; }
+    public int getRemainingSeconds() { return remainingSeconds; }
+    public boolean isWorkingPhase() { return isWorkingPhase; }
     public boolean isLimitPaused() { return isLimitPaused; }
     public boolean isSchedulePaused() { return isSchedulePaused; }
     public boolean isLimitActive() { return isLimitActive; }
@@ -59,6 +64,8 @@ public class Device {
     public void setStartTime(String startTime) { this.startTime = startTime; }
     public void setWorkDuration(double workDuration) { this.workDuration = workDuration; }
     public void setOffDuration(double offDuration) { this.offDuration = offDuration; }
+    public void setRemainingSeconds(int remainingSeconds) { this.remainingSeconds = remainingSeconds; }
+    public void setWorkingPhase(boolean workingPhase) { isWorkingPhase = workingPhase; }
     public void setLimitPaused(boolean limitPaused) { isLimitPaused = limitPaused; }
     public void setSchedulePaused(boolean schedulePaused) { isSchedulePaused = schedulePaused; }
     public void setLimitActive(boolean limitActive) { isLimitActive = limitActive; }

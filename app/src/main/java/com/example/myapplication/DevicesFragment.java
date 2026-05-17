@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -140,8 +141,12 @@ public class DevicesFragment extends Fragment {
         if (device.isScheduleActive()) {
             binding.btnPauseSchedule.setVisibility(View.VISIBLE);
             binding.btnPauseSchedule.setText(device.isSchedulePaused() ? "استمرار" : "إيقاف مؤقت");
+            binding.tvCountdownLabel.setVisibility(View.VISIBLE);
+            binding.tvScheduleCountdown.setVisibility(View.VISIBLE);
         } else {
             binding.btnPauseSchedule.setVisibility(View.GONE);
+            binding.tvCountdownLabel.setVisibility(View.GONE);
+            binding.tvScheduleCountdown.setVisibility(View.GONE);
         }
     }
 
@@ -157,17 +162,19 @@ public class DevicesFragment extends Fragment {
             dev.setLimit(limit);
             dev.setLimitActive(true);
             dev.setLimitPaused(false);
+            dev.setState(true); // تشغيل الجهاز في البيانات
             deviceManager.saveDevices();
             
-            // 1. إرسال قيمة الحد
+            // تفعيل الجهاز تلقائياً عند البدء
             wsManager.sendLimitValue(deviceId, (double) limit);
-            // 2. تفعيل وضع الـ Auto لضمان عمل الميزة
             wsManager.sendModeCommand(deviceId, "auto");
+            wsManager.sendRelayCommand(deviceId, 1); // فتح الـ Relay (تشغيل الجهاز)
             binding.toggleGroupMode.check(R.id.btnAuto);
+            binding.swMainRelay.setChecked(true); // تحديث الواجهة
             
             binding.btnPauseLimit.setVisibility(View.VISIBLE);
             binding.btnPauseLimit.setText("إيقاف مؤقت");
-            Toast.makeText(getContext(), "تم بدء مراقبة التكلفة وتحويل الجهاز للوضع التلقائي", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "تم بدء مراقبة التكلفة وتشغيل الجهاز", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnPauseLimit.setOnClickListener(v -> {
@@ -176,10 +183,8 @@ public class DevicesFragment extends Fragment {
             boolean newState = !dev.isLimitPaused();
             dev.setLimitPaused(newState);
             deviceManager.saveDevices();
-            
             wsManager.sendPauseCommand(deviceId, "limit", newState);
             binding.btnPauseLimit.setText(newState ? "استمرار" : "إيقاف مؤقت");
-            Toast.makeText(getContext(), newState ? "تم الإيقاف مؤقتاً" : "تم الاستئناف", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnCancelLimit.setOnClickListener(v -> {
@@ -187,11 +192,9 @@ public class DevicesFragment extends Fragment {
             if (dev == null) return;
             dev.setLimitActive(false);
             deviceManager.saveDevices();
-            
             wsManager.sendLimitValue(deviceId, 0.0);
             binding.btnPauseLimit.setVisibility(View.GONE);
             binding.progressLimit.setProgress(0);
-            Toast.makeText(getContext(), "تم إلغاء مراقبة التكلفة", Toast.LENGTH_SHORT).show();
         });
 
         // --- قسم الخطة الزمنية ---
@@ -213,17 +216,21 @@ public class DevicesFragment extends Fragment {
             dev.setOffDuration(offSecs);
             dev.setScheduleActive(true);
             dev.setSchedulePaused(false);
+            dev.setState(true); // تشغيل الجهاز في البيانات
             deviceManager.saveDevices();
 
-            // 1. إرسال الخطة
+            // تفعيل الخطة وتشغيل اللمبة تلقائياً
             wsManager.sendScheduleCommand(deviceId, startTime, (double) workSecs, (double) offSecs);
-            // 2. تفعيل وضع الـ Auto
             wsManager.sendModeCommand(deviceId, "auto");
+            wsManager.sendRelayCommand(deviceId, 1); // فتح الـ Relay (تشغيل الجهاز)
             binding.toggleGroupMode.check(R.id.btnAuto);
+            binding.swMainRelay.setChecked(true); // تحديث الواجهة
 
             binding.btnPauseSchedule.setVisibility(View.VISIBLE);
             binding.btnPauseSchedule.setText("إيقاف مؤقت");
-            Toast.makeText(getContext(), "تم تفعيل الخطة الزمنية وتحويل الجهاز للوضع التلقائي", Toast.LENGTH_SHORT).show();
+            binding.tvCountdownLabel.setVisibility(View.VISIBLE);
+            binding.tvScheduleCountdown.setVisibility(View.VISIBLE);
+            Toast.makeText(getContext(), "تم تفعيل الخطة وتشغيل الجهاز", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnPauseSchedule.setOnClickListener(v -> {
@@ -232,10 +239,8 @@ public class DevicesFragment extends Fragment {
             boolean newState = !dev.isSchedulePaused();
             dev.setSchedulePaused(newState);
             deviceManager.saveDevices();
-            
             wsManager.sendPauseCommand(deviceId, "schedule", newState);
             binding.btnPauseSchedule.setText(newState ? "استمرار" : "إيقاف مؤقت");
-            Toast.makeText(getContext(), newState ? "تم الإيقاف مؤقتاً" : "تم الاستئناف", Toast.LENGTH_SHORT).show();
         });
 
         binding.btnCancelSchedule.setOnClickListener(v -> {
@@ -243,10 +248,10 @@ public class DevicesFragment extends Fragment {
             if (dev == null) return;
             dev.setScheduleActive(false);
             deviceManager.saveDevices();
-            
             wsManager.sendScheduleCommand(deviceId, "00:00", 0.0, 0.0);
             binding.btnPauseSchedule.setVisibility(View.GONE);
-            Toast.makeText(getContext(), "تم إيقاف الخطة الزمنية", Toast.LENGTH_SHORT).show();
+            binding.tvCountdownLabel.setVisibility(View.GONE);
+            binding.tvScheduleCountdown.setVisibility(View.GONE);
         });
 
         binding.btnStartTime.setOnClickListener(v -> {
@@ -300,28 +305,48 @@ public class DevicesFragment extends Fragment {
                 }).setNegativeButton("إلغاء", null).show();
     }
 
-    public void updateMetrics(double current, double voltage, double power, double energy, double pf, double freq, double billSyp) {
+    public void updateMetrics(Esp32WebSocketManager.TelemetryMessage data) {
         if (binding == null) return;
-        binding.tvCurrentValue.setText(String.format(Locale.getDefault(), "%.2f A", current));
-        binding.tvVoltageValue.setText(String.format(Locale.getDefault(), "%.1f V", voltage));
-        binding.tvPowerValue.setText(String.format(Locale.getDefault(), "%.1f W", power));
-        binding.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.3f Kwh", energy));
-        binding.tvPFValue.setText(String.format(Locale.getDefault(), "%.2f", pf));
-        binding.tvFreqValue.setText(String.format(Locale.getDefault(), "%.1f Hz", freq));
+        binding.tvCurrentValue.setText(String.format(Locale.getDefault(), "%.2f A", data.current));
+        binding.tvVoltageValue.setText(String.format(Locale.getDefault(), "%.1f V", data.volts));
+        binding.tvPowerValue.setText(String.format(Locale.getDefault(), "%.1f W", data.pwrW));
+        binding.tvEnergyValue.setText(String.format(Locale.getDefault(), "%.3f Kwh", data.energy));
+        binding.tvPFValue.setText(String.format(Locale.getDefault(), "%.2f", data.pf));
+        binding.tvFreqValue.setText(String.format(Locale.getDefault(), "%.1f Hz", data.freq));
 
         // حساب السعر الفعلي بناءً على المعادلة (600 لـ 0.01 و 1400 للباقي)
-        double energyKwh = energy;
+        double energyKwh = data.energy;
         double calculatedPrice = (energyKwh <= 0.01) ? 
                 (energyKwh / 0.01) * 600 : 
                 600 + ((energyKwh - 0.01) / 0.01) * 1400;
 
         // تحديث شريط التقدم الدائري للتكلفة
         Device dev = getSelectedDevice();
-        if (dev != null && dev.isLimitActive()) {
-            double limit = dev.getLimit();
-            if (limit > 0) {
-                int progress = (int) ((calculatedPrice / limit) * 100);
-                binding.progressLimit.setProgress(Math.min(progress, 100));
+        if (dev != null) {
+            if (dev.isLimitActive()) {
+                double limit = dev.getLimit();
+                if (limit > 0) {
+                    int progress = (int) ((calculatedPrice / limit) * 100);
+                    binding.progressLimit.setProgress(Math.min(progress, 100));
+                }
+            }
+            
+            // تحديث العد التنازلي مع دعم وضع الإيقاف
+            if (dev.isScheduleActive()) {
+                binding.tvCountdownLabel.setVisibility(View.VISIBLE);
+                binding.tvScheduleCountdown.setVisibility(View.VISIBLE);
+                
+                int mins = data.remainingSecs / 60;
+                int secs = data.remainingSecs % 60;
+                String phase = (data.isWorkPhase == 1) ? "مرحلة العمل" : "مرحلة التوقف";
+                String status = dev.isSchedulePaused() ? " (مُتوقف)" : "";
+                
+                binding.tvScheduleCountdown.setText(String.format(Locale.getDefault(), "%s: %02d:%02d%s", phase, mins, secs, status));
+                binding.tvScheduleCountdown.setTextColor(dev.isSchedulePaused() ? Color.GRAY : 
+                    (data.isWorkPhase == 1 ? Color.parseColor("#81ECFF") : Color.parseColor("#FF5252")));
+            } else {
+                binding.tvCountdownLabel.setVisibility(View.GONE);
+                binding.tvScheduleCountdown.setVisibility(View.GONE);
             }
         }
     }
@@ -331,7 +356,7 @@ public class DevicesFragment extends Fragment {
         super.onStart();
         wsManager.setMessageReceivedListener(new Esp32WebSocketManager.OnMessageReceivedListener() {
             @Override public void onTelemetryReceived(Esp32WebSocketManager.TelemetryMessage data) {
-                updateMetrics(data.current, data.volts, data.pwrW, data.energy, data.pf, data.freq, data.billSyp);
+                updateMetrics(data);
                 binding.swMainRelay.setOnCheckedChangeListener(null);
                 binding.swMainRelay.setChecked(data.relayState == 1);
                 setupRelayControl();

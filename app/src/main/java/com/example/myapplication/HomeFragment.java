@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +57,7 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onAlertReceived(Esp32WebSocketManager.AlertMessage data) {
-                // Future feature: Show Toast or update UI for alerts
-            }
+            public void onAlertReceived(Esp32WebSocketManager.AlertMessage data) { }
 
             @Override
             public void onEmergencyReceived(Esp32WebSocketManager.EmergencyMessage data) {
@@ -78,11 +75,11 @@ public class HomeFragment extends Fragment {
     private void updateTelemetryUI(Esp32WebSocketManager.TelemetryMessage metric) {
         if (binding == null) return;
 
-        // 1. استخدام الطاقة التراكمية الصحيحة (kWh) من الحساس
+        // تحديث قيمة الاستهلاك (kWh)
         double energyKwh = metric.energy;
         binding.energyValue.setText(String.format(Locale.getDefault(), "%.3f", energyKwh));
 
-        // 2. حساب السعر بناءً على المعادلة المطلوبة:
+        // حساب السعر بناءً على المعادلة المطلوبة:
         // أول 0.01 ك.و.س بسعر 600 ليرة
         // ما بعد ذلك، كل 0.01 ك.و.س بسعر 1400 ليرة
         double totalBill = 0;
@@ -91,8 +88,10 @@ public class HomeFragment extends Fragment {
         } else {
             totalBill = 600 + ((energyKwh - 0.01) / 0.01) * 1400;
         }
-
         binding.priceValue.setText(currencyFormat.format(totalBill));
+
+        // إظهار القدرة اللحظية (الواط) بجانب الوحدة إذا لزم الأمر
+        binding.tvPowerUnit.setText(String.format(Locale.getDefault(), "%.1f W", metric.pwrW));
     }
 
     private void updateDeviceStatusUI(Esp32WebSocketManager.RelayStatusMessage data) {
@@ -109,18 +108,10 @@ public class HomeFragment extends Fragment {
 
     private void setupDevices() {
         deviceList = deviceManager.getDevices();
-
         deviceAdapter = new DeviceAdapter(deviceList, new DeviceAdapter.OnDeviceChangeListener() {
-            @Override
-            public void onDeviceToggle(Device device, boolean isChecked) {
-                wsManager.sendRelayCommand(device.getId(), isChecked ? 1 : 0);
-            }
-            @Override
-            public void onDeviceClick(Device device) {
-                navigateToDeviceDetails(device);
-            }
-            @Override
-            public void onDeviceLongClick(Device device, int position) {
+            @Override public void onDeviceToggle(Device device, boolean isChecked) { wsManager.sendRelayCommand(device.getId(), isChecked ? 1 : 0); }
+            @Override public void onDeviceClick(Device device) { navigateToDeviceDetails(device); }
+            @Override public void onDeviceLongClick(Device device, int position) {
                 new AlertDialog.Builder(requireContext())
                         .setTitle("حذف الجهاز")
                         .setMessage("هل أنت متأكد من حذف جهاز " + device.getName() + "؟")
@@ -132,7 +123,6 @@ public class HomeFragment extends Fragment {
                         .show();
             }
         });
-        
         binding.rvDeviceList.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvDeviceList.setAdapter(deviceAdapter);
     }
@@ -145,9 +135,5 @@ public class HomeFragment extends Fragment {
                 .commit();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+    @Override public void onDestroyView() { super.onDestroyView(); binding = null; }
 }

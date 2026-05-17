@@ -194,6 +194,10 @@ public class Esp32WebSocketManager {
         public double energy;
         public double pf;
         public double freq;
+        
+        // حقول العد التنازلي الجديدة
+        @SerializedName("rem_secs") public int remainingSecs;
+        @SerializedName("is_work") public int isWorkPhase;
     }
 
     public static class EmergencyMessage {
